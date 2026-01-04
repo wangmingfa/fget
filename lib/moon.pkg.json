@@ -1,0 +1,9 @@
+{
+    "is-main": false,
+    "import": [
+      "moonbitlang/regexp",
+    ],
+    "native-stub": [
+      "c/console.c"
+    ]
+}
