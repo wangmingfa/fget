@@ -48,18 +48,34 @@ jobs:
       - name: Set up MoonBit (Windows)
         if: matrix.os_name == 'windows'
         shell: powershell
+        env:
+          MOONBIT_INSTALL_VERSION: "latest"
         run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.cn/install/powershell.ps1 | iex
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       # =========================
-      # Build
+      # MoonBit 验证 & 更新
+      # =========================
+
+      - name: Verify installation
+        shell: bash
+        run: |
+          moon version --all
+
+      - name: Update Registry
+        shell: bash
+        run: |
+          moon update
+
+      # =========================
+      # 构建项目
       # =========================
 
       - name: Build (Linux / macOS)
         if: matrix.os_name == 'linux' || matrix.os_name == 'macos'
         shell: bash
         run: |
-          moon update
           moon build
 
       - name: Build (Windows)
