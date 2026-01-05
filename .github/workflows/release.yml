@@ -12,41 +12,79 @@ jobs:
   release:
     runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: ubuntu-latest
             os_name: linux
-            ext: ""
             artifact_path: target/native/release/build/main/main.exe
+            ext: ""
+
           - runner: macos-latest
             os_name: macos
-            ext: ""
             artifact_path: target/native/release/build/fget.exe
+            ext: ""
+
           - runner: windows-latest
             os_name: windows
-            ext: ".exe"
             artifact_path: target/native/release/build/main/main.exe
+            ext: ".exe"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up MoonBit
+      # =========================
+      # MoonBit 安装
+      # =========================
+
+      - name: Set up MoonBit (Linux / macOS)
+        if: matrix.os_name == 'linux' || matrix.os_name == 'macos'
+        shell: bash
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
-      - name: Build
+      - name: Set up MoonBit (Windows)
+        if: matrix.os_name == 'windows'
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+          irm https://cli.moonbitlang.cn/install/powershell.ps1 | iex
+
+      # =========================
+      # Build
+      # =========================
+
+      - name: Build (Linux / macOS)
+        if: matrix.os_name == 'linux' || matrix.os_name == 'macos'
+        shell: bash
         run: |
           moon update
           moon build
 
+      - name: Build (Windows)
+        if: matrix.os_name == 'windows'
+        shell: powershell
+        run: |
+          moon update
+          moon build
+
+      # =========================
+      # 验证产物存在
+      # =========================
+
       - name: Verify artifact
+        shell: bash
         run: |
           test -f ${{ matrix.artifact_path }}
 
-      # 检测架构
-      - name: Detect architecture
+      # =========================
+      # 架构检测
+      # =========================
+
+      - name: Detect architecture (Linux / macOS)
+        if: matrix.os_name == 'linux' || matrix.os_name == 'macos'
         shell: bash
         run: |
           case "$(uname -m)" in
@@ -56,7 +94,21 @@ jobs:
           esac
           echo "ARCH=$ARCH" >> $GITHUB_ENV
 
-      # 重命名产物为 fget-<tag>-<os>-<arch>[.exe]
+      - name: Detect architecture (Windows)
+        if: matrix.os_name == 'windows'
+        shell: powershell
+        run: |
+          $arch = switch ($Env:PROCESSOR_ARCHITECTURE) {
+            "AMD64" { "x86_64" }
+            "ARM64" { "arm64" }
+            default { "unknown" }
+          }
+          echo "ARCH=$arch" >> $Env:GITHUB_ENV
+
+      # =========================
+      # 重命名产物
+      # =========================
+
       - name: Rename artifact
         shell: bash
         run: |
@@ -64,7 +116,10 @@ jobs:
           cp ${{ matrix.artifact_path }} \
              fget-${VERSION}-${{ matrix.os_name }}-${ARCH}${{ matrix.ext }}
 
-      # 发布
+      # =========================
+      # 发布 Release
+      # =========================
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
