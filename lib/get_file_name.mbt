@@ -28,12 +28,11 @@ pub fn get_file_name(url : String, headers : Map[String, String]) -> String {
       }
     }
   }
-  let arr = url.split("/").collect()
+  let arr = url.split("/").filter(v => v.trim() != "").collect()
   let last_part = arr[arr.length() - 1]
   // 去掉URL参数
   let last_part = last_part.split("?").collect()[0]
   // 如果是HTML页面，则使用域名作为文件名
-  println(get_from_map_ignore_case(headers, "Content-Type"))
   if get_from_map_ignore_case(headers, "Content-Type") is Some(content_type) &&
     content_type.contains("text/html") {
     "\{last_part}.html"
@@ -71,4 +70,5 @@ test "html" {
     get_file_name(url, { "Content-Type": "text/html" }),
     content="www.baidu.com.html",
   )
+  inspect(get_file_name(url, {}), content="www.baidu.com")
 }
