@@ -39,14 +39,11 @@ jobs:
       # MoonBit 安装、验证、更新、构建
       # -------------------------
       - name: Setup And Build (Linux / macOS)
-        if: matrix.os_name == 'linux' || matrix.os_name == 'macos'
+        if: matrix.os_name != 'windows'
         shell: bash
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
-          moon version --all
-          moon update
-          moon build
 
       - name: Setup And Build (Windows)
         if: matrix.os_name == 'windows'
@@ -56,6 +53,19 @@ jobs:
           irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+
+      - name: Check & Build
+        if: matrix.os_name != 'windows'
+        shell: bash
+        run: |
+          moon version --all
+          moon update
+          moon build
+
+      - name: Check & Build (Windows)
+        if: matrix.os_name == 'windows'
+        shell: powershell
+        run: |
           moon version --all
           moon update
           moon build
