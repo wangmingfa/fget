@@ -23,7 +23,7 @@ jobs:
 
       - name: Build
         run: |
-          moon build
+          moon update && moon build
 
       - name: Verify artifact
         run: |
