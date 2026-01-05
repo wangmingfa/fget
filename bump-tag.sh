@@ -1,29 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# -----------------------------
-# 读取最新 tag
-# -----------------------------
+# =============================
+# 获取最新 tag
+# =============================
 latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
 [[ -z "$latest_tag" ]] && latest_tag="v0.0.0"
 
 version="${latest_tag#v}"
 IFS='.' read -r major minor patch <<< "$version"
 
-# -----------------------------
-# 菜单数据
-# -----------------------------
+# =============================
+# 菜单配置
+# =============================
 options=(
   "major  → $((major + 1)).0.0"
   "minor  → $major.$((minor + 1)).0"
   "patch  → $major.$minor.$((patch + 1))"
 )
 
-selected=0
+# 默认选中 patch
+selected=2
 
-# -----------------------------
+# =============================
 # 渲染菜单
-# -----------------------------
+# =============================
 render_menu() {
   clear
   echo "当前最新 tag: $latest_tag"
@@ -40,39 +41,35 @@ render_menu() {
   done
 }
 
-# -----------------------------
-# 读取按键
-# -----------------------------
+# =============================
+# 读取按键（稳定版）
+# =============================
 read_key() {
-  IFS= read -rsn1 key
-  if [[ $key == $'\x1b' ]]; then
-    read -rsn2 key
-    echo "$key"
-  else
-    echo "$key"
-  fi
+  local key
+  IFS= read -rsn3 key
+  echo "$key"
 }
 
-# -----------------------------
-# 交互循环
-# -----------------------------
+# =============================
+# 交互主循环
+# =============================
 while true; do
   render_menu
   key=$(read_key)
 
   case "$key" in
-    '[A') # ↑
+    $'\x1b[A') # ↑
       ((selected--))
       ((selected < 0)) && selected=$((${#options[@]} - 1))
       ;;
-    '[B') # ↓
+    $'\x1b[B') # ↓
       ((selected++))
       ((selected >= ${#options[@]})) && selected=0
       ;;
-    '') # Enter
+    '') # Enter（read -n3 时回车是空串）
       break
       ;;
-    $'\x03'|$'\x1b') # Ctrl+C / ESC
+    $'\x03') # Ctrl+C
       echo
       echo "已取消"
       exit 0
@@ -80,9 +77,9 @@ while true; do
   esac
 done
 
-# -----------------------------
+# =============================
 # 计算新版本
-# -----------------------------
+# =============================
 case "$selected" in
   0)
     major=$((major + 1)); minor=0; patch=0 ;;
@@ -94,9 +91,9 @@ esac
 
 new_tag="v$major.$minor.$patch"
 
-# -----------------------------
-# 确认
-# -----------------------------
+# =============================
+# 最终确认
+# =============================
 clear
 echo "当前 tag : $latest_tag"
 echo "新 tag   : $new_tag"
@@ -108,11 +105,11 @@ if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
   exit 0
 fi
 
-# -----------------------------
-# 创建并推送
-# -----------------------------
+# =============================
+# 创建并推送 tag
+# =============================
 git tag "$new_tag"
 git push origin "$new_tag"
 
 echo
-echo "✅ 已成功发布 tag: $new_tag"
+echo "✅ 已成功创建并推送 tag: $new_tag"
