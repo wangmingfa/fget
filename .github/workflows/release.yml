@@ -26,10 +26,10 @@ jobs:
             os_name: macos
             artifact_path: target/native/release/build/main/main.exe
             ext: ""
-          - runner: windows-latest
-            os_name: windows
-            artifact_path: target/native/release/build/main/main.exe
-            ext: ".exe"
+          # - runner: windows-latest
+          #   os_name: windows
+          #   artifact_path: target/native/release/build/main/main.exe
+          #   ext: ".exe"
 
     steps:
       - name: Checkout
@@ -38,14 +38,14 @@ jobs:
       # -------------------------
       # MoonBit 安装、验证、更新、构建
       # -------------------------
-      - name: Setup And Build (Linux / macOS)
+      - name: Setup (Linux / macOS)
         if: matrix.os_name != 'windows'
         shell: bash
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
-      - name: Setup And Build (Windows)
+      - name: Setup (Windows)
         if: matrix.os_name == 'windows'
         shell: powershell
         run: |
@@ -54,7 +54,7 @@ jobs:
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
 
-      - name: Check & Build
+      - name: Check & Build (Linux / macOS)
         if: matrix.os_name != 'windows'
         shell: bash
         run: |
