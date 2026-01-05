@@ -82,7 +82,6 @@ jobs:
         if: matrix.os_name == 'windows'
         shell: powershell
         run: |
-          moon update
           moon build
 
       # =========================
