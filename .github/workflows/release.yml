@@ -22,7 +22,7 @@ jobs:
 
           - runner: macos-latest
             os_name: macos
-            artifact_path: target/native/release/build/fget.exe
+            artifact_path: target/native/release/build/main/main.exe
             ext: ""
 
           - runner: windows-latest
@@ -49,8 +49,7 @@ jobs:
         if: matrix.os_name == 'windows'
         shell: powershell
         run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-          irm https://cli.moonbitlang.cn/install/powershell.ps1 | iex
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.cn/install/powershell.ps1 | iex
 
       # =========================
       # Build
