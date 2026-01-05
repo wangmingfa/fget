@@ -12,7 +12,26 @@ struct DownloadResult {
   size : Double
   // 下载耗时（毫秒）
   time : UInt64
-} derive(Show, Default)
+} derive(Show)
+
+///|
+pub fn DownloadResult::default(
+  url : String,
+  file_name : String?,
+) -> DownloadResult {
+  return DownloadResult::{
+    url,
+    file_name: if file_name is Some(name) {
+      name
+    } else {
+      ""
+    },
+    file_path: "",
+    success: false,
+    size: 0.0,
+    time: 0,
+  }
+}
 
 ///|
 pub fn get_speed(size : Double, time : UInt64) -> Double {

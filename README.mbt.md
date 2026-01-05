@@ -3,7 +3,7 @@
 ## 开发调试
 
 ```bash
-moon run . <url> [file_name]
+moon run main <url> [file_name]
 ```
 
 ## 生产环境
