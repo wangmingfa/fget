@@ -16,6 +16,12 @@ async fn get_fatest(
   if urls.is_empty() {
     raise StringError("urls不能为空")
   }
+  // 对urls去重
+  let urls = if urls.length() > 1 {
+    Set::from_array(urls).to_array()
+  } else {
+    urls
+  }
   if urls.length() == 1 {
     return get_inner(urls[0], file_name, 0, None)
   }
@@ -27,7 +33,7 @@ async fn get_fatest(
   pick_fatest(
     async fn(task_status) {
       @async.sleep(2000)
-      println("开始检查哪个链接下载速度更快")
+      overwrite_line("开始检查哪个链接下载速度更快")
       task_status.start_check()
     },
     FixedArray::from_array(tasks),
@@ -170,7 +176,12 @@ async fn download(
     }
     let chunk = client.read_some(max_len=chunk_size) catch {
       e => {
-        println("读取chunk出错：\{e}")
+        match e.to_string() {
+          "Cancelled" =>
+            // 被取消了，删除文件
+            @fs.remove(file_path)
+          _ => println("读取chunk出错：\{e}")
+        }
         return None
       }
     }

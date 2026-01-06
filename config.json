@@ -1,9 +1,9 @@
 {
     "https://github.com/**/releases/**": [
+        "${url}",
         "https://cdn.gh-proxy.org/${url}"
     ],
     "https://www.baidu.com": [
-        "https://szpdmtest.vivo.xyz/filemanager/api/attachment/download?code=3E729E1069244439B019144FB54AC0F1",
-        "https://szpdmtest.vivo.xyz/filemanager/api/attachment/download?code=DB8417F8EDC04E35B900AAFA782552BD"
+        "${url}"
     ]
 }

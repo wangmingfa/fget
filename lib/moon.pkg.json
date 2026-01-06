@@ -8,6 +8,7 @@
       "justjavac/glob"
     ],
     "native-stub": [
-      "c/console.c"
+      "c/console.c",
+      "c/signal.c"
     ]
 }

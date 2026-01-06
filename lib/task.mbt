@@ -56,6 +56,7 @@ async fn[T] pick_fatest(
           task_status.stop_others(id)
           return Some(res)
         } else {
+          task_status.stop(id)
           println("任务 \{id} 终止")
         }
       }
