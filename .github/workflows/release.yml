@@ -53,6 +53,13 @@ jobs:
           irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           & "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat"
+      
+      # -------------------------
+      # Windows：初始化 MSVC
+      # -------------------------
+      - name: Set up MSVC (Windows)
+        if: matrix.os_name == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Check & Build (Linux / macOS)
         if: matrix.os_name != 'windows'
@@ -64,7 +71,6 @@ jobs:
 
       - name: Check & Build (Windows)
         if: matrix.os_name == 'windows'
-        uses: ilammy/msvc-dev-cmd@v1
         shell: powershell
         run: |
           moon version --all
