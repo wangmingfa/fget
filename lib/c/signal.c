@@ -1,5 +1,6 @@
 // signal.c
 #include "signal.h"
+#include <stddef.h>
 
 #ifdef _WIN32
 
