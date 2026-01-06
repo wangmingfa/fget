@@ -156,7 +156,7 @@ async fn download(
   let chunk_size = 1024 * 1024
   let mut prev_time = start_time
   let mut prev_size = 0L
-  println("任务 \{id} : \{url} 开始下载...")
+  print_when_only_running("任务 \{id} : \{url} 开始下载...")
   while true {
     if (prev_time - start_time) % 1000 == 0 {
       // println("任务 \{id} 进行中...")

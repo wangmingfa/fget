@@ -56,7 +56,7 @@ jobs:
       # -------------------------
       # Windows：初始化 MSVC
       # -------------------------
-      - name: Set up MSVC (Windows)
+      - name: Setup MSVC (Windows)
         if: matrix.os_name == 'windows'
         uses: ilammy/msvc-dev-cmd@v1
 
