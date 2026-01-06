@@ -26,10 +26,10 @@ jobs:
             os_name: macos
             artifact_path: target/native/release/build/main/main.exe
             ext: ""
-          # - runner: windows-latest
-          #   os_name: windows
-          #   artifact_path: target/native/release/build/main/main.exe
-          #   ext: ".exe"
+          - runner: windows-latest
+            os_name: windows
+            artifact_path: target/native/release/build/main/main.exe
+            ext: ".exe"
 
     steps:
       - name: Checkout
@@ -64,6 +64,7 @@ jobs:
 
       - name: Check & Build (Windows)
         if: matrix.os_name == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
         shell: powershell
         run: |
           moon version --all

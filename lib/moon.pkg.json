@@ -2,6 +2,10 @@
     "is-main": false,
     "import": [
       "moonbitlang/regexp",
+      "moonbitlang/async",
+      "moonbitlang/async/http",
+      "moonbitlang/async/fs",
+      "justjavac/glob"
     ],
     "native-stub": [
       "c/console.c"

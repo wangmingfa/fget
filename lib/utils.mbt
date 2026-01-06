@@ -59,3 +59,12 @@ test "test_push_all" {
   push_all(arr, [4, 5, 6])
   inspect(arr, content="[1, 2, 3, 4, 5, 6]")
 }
+
+///|
+pub async fn[T, K] async_map(arr : Array[T], f : async (T) -> K) -> Array[K] {
+  let new_arr = []
+  for a in arr {
+    new_arr.push(f(a))
+  }
+  new_arr
+}

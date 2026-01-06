@@ -11,16 +11,16 @@ const GREEN = "\u{001B}[32m"
 const YELLOW = "\u{001B}[33m"
 
 ///|
-pub fn red(text : String) -> String {
+pub fn[T : Show] red(text : T) -> String {
   "\{RED}\{text}\{RESET}"
 }
 
 ///|
-pub fn green(text : String) -> String {
+pub fn[T : Show] green(text : T) -> String {
   "\{GREEN}\{text}\{RESET}"
 }
 
 ///|
-pub fn yellow(text : String) -> String {
+pub fn[T : Show] yellow(text : T) -> String {
   "\{YELLOW}\{text}\{RESET}"
 }
