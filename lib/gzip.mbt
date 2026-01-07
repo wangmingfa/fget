@@ -1,25 +1,10 @@
 ///|
-#cfg(platform="windows")
 pub async fn gzip_decode(
   src_file_path : String,
   out_file_path : String,
   retain_src_file? : Bool = true,
 ) -> Bool {
-  // Windows: tar -xzf in.gz -O > out
-  let success = run("tar", ["-xzf", src_file_path, "-O", ">", out_file_path])
-  gzip_cleanup(src_file_path, out_file_path, retain_src_file, success)
-  success
-}
-
-///|
-#cfg(not(platform="windows"))
-pub async fn gzip_decode(
-  src_file_path : String,
-  out_file_path : String,
-  retain_src_file? : Bool = true,
-) -> Bool {
-  // macOS / Linux
-  // gzip -dc in.gz > out
+  // gzip -dc src_file_path > out_file_path
   let success = run_with_stdout_to_file(
     "gzip",
     ["-dc", src_file_path],

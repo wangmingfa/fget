@@ -3,5 +3,6 @@
     "import": [
       "username/fget/lib",
       "moonbitlang/async",
+      "moonbitlang/async/process"
     ]
 }
