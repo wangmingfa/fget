@@ -112,7 +112,7 @@ jobs:
           echo "ARCH=$arch" >> $Env:GITHUB_ENV
 
       # -------------------------
-      # UPX 压缩（Linux / Windows）
+      # UPX 压缩
       # -------------------------
       - name: Install UPX (Linux)
         if: matrix.os_name == 'linux'
@@ -126,10 +126,15 @@ jobs:
         if: matrix.os_name == 'windows'
         shell: powershell
         run: |
-          Invoke-WebRequest -Uri https://github.com/upx/upx/releases/download/v5.0.2/upx-5.0.2-win64.zip -OutFile upx.zip
-          Expand-Archive upx.zip -DestinationPath $Env:TEMP\upx
-          echo "$Env:TEMP\upx" | Out-File -FilePath $Env:GITHUB_PATH -Append
-          Write-Host "UPX installed at $Env:TEMP\upx"
+          winget install --id UPX.UPX -e --accept-package-agreements --accept-source-agreements
+          upx --version
+
+      - name: Install UPX (macOS)
+        if: matrix.os_name == 'macos'
+        shell: bash
+        run: |
+          brew install upx
+          upx --version
 
       - name: Compress executable (Linux / Windows)
         if: matrix.os_name == 'linux' || matrix.os_name == 'windows'
