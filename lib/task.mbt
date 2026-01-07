@@ -140,3 +140,49 @@ pub fn TaskStatus::only_current_running(self : TaskStatus, id : Int) -> Bool {
   !self.stopped_ids.contains(id) &&
   self.states.length() - self.stopped_ids.length() == 1
 }
+
+///|
+type RaceFn[T] = async () -> T?
+
+///|
+pub async fn[T] race(tasks : FixedArray[RaceFn[T]]) -> T? {
+  let mut race_result = None
+  @async.with_task_group(async fn(root) {
+    let tasks = tasks.map(task => root.spawn(async fn() { task() }))
+    while true {
+      for index, task in tasks {
+        if task.try_wait() is Some(res) {
+          // 取消其他任务
+          for other_index, other_task in tasks {
+            if index != other_index {
+              other_task.cancel()
+            }
+          }
+          race_result = res
+          return None
+        }
+      }
+      @async.pause()
+    }
+    None
+  }) catch {
+    e =>
+      match e.to_string() {
+        "Cancelled" => race_result
+        _ => {
+          println("错误：\{e}")
+          None
+        }
+      }
+  }
+}
+
+///|
+pub async fn[T] race_with_ctrl_c(tasks : FixedArray[RaceFn[T]]) -> T? {
+  let tasks = Array::from_fixed_array(tasks)
+  tasks.push(async fn() {
+    wait_signal(Signal::CTRL_C)
+    None
+  })
+  race(FixedArray::from_array(tasks))
+}
