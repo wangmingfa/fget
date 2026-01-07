@@ -4,6 +4,9 @@ pub async fn gzip_decode(
   out_file_path : String,
   retain_src_file? : Bool = true,
 ) -> Bool {
+  if src_file_path == out_file_path {
+    raise fail("src_file_path和out_file_path不能相同")
+  }
   // gzip -dc src_file_path > out_file_path
   let success = run_with_stdout_to_file(
     "gzip",
