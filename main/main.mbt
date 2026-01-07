@@ -8,7 +8,7 @@ async fn main {
   }
   // 检查gzip
   if !check_gzip() {
-    println("请先安装 gzip，例如：\n")
+    println("请先安装 gzip，例如：")
     println("  Linux/macOS: sudo apt install gzip 或 brew install gzip")
     println(
       "  Windows: 使用 Git Bash 或 在Powershell中运行 winget install GnuWin32.Gzip 安装 Gzip",
