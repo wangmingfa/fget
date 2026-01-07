@@ -42,7 +42,7 @@ pub(all) enum Signal {
 }
 
 ///|
-pub async fn wait_signal(signal : Signal, exit : Ref[Bool]) -> Unit {
+pub async fn wait_signal(signal : Signal) -> Unit {
   let signal = match signal {
     CTRL_C => SIGINT
     NORMAL_EXIT => SIGTERM
@@ -50,12 +50,9 @@ pub async fn wait_signal(signal : Signal, exit : Ref[Bool]) -> Unit {
   }
   setup_signal_handler(signal)
   while true {
-    if exit.val {
-      break
-    }
     if is_interrupted(signal) != 0 {
       let signal = yellow(signal)
-      println("\nSignal \{signal}")
+      println("\n结束，信号值：\{signal}")
       break
     }
     @async.pause()

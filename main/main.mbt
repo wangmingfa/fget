@@ -7,9 +7,8 @@ async fn main {
     return
   }
   @async.with_task_group(async fn(root) {
-    let exit = Ref::new(false)
     let signal_task = root.spawn(async fn() {
-      @lib.wait_signal(@lib.Signal::CTRL_C, exit)
+      @lib.wait_signal(@lib.Signal::CTRL_C)
     })
     let download_task = root.spawn(async fn() {
       let (url, file_name) = (args[0], args.get(1))
@@ -32,7 +31,7 @@ async fn main {
       }
       if download_task.try_wait() is Some(_) {
         // 下载完了
-        exit.val = true
+        signal_task.cancel()
         break
       }
       @async.sleep(100)
