@@ -127,8 +127,18 @@ jobs:
         shell: powershell
         run: |
           winget install --id UPX.UPX -e --accept-package-agreements --accept-source-agreements
-          # 强制刷新当前会话的环境变量（这一步很关键）
+
+          # 1. 强制刷新当前会话的环境变量（这一步很关键，这样才能在powershell中使用）
           $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
+          # 2. 找到 UPX 的实际安装位置
+          # 我们通过命令动态获取它
+          $upxPath = Split-Path (Get-Command upx.exe).Source
+
+          # 3. 关键：将路径写入 GITHUB_PATH（这样才能在bash中使用upx）
+          # 这样后续所有的 Step（包括 bash）都能找到它
+          echo "$upxPath" >> $env:GITHUB_PATH
+
           upx --version
 
       - name: Install UPX (macOS)
@@ -138,8 +148,7 @@ jobs:
           brew install upx
           upx --version
 
-      - name: Compress executable (Linux / Windows)
-        if: matrix.os_name == 'linux' || matrix.os_name == 'windows'
+      - name: Compress executable
         shell: bash
         run: |
           echo "Compressing with UPX..."
