@@ -141,14 +141,15 @@ jobs:
 
           upx --version
 
-      - name: Install UPX (macOS)
-        if: matrix.os_name == 'macos'
-        shell: bash
-        run: |
-          brew install upx
-          upx --version
+      # - name: Install UPX (macOS)
+      #   if: matrix.os_name == 'macos'
+      #   shell: bash
+      #   run: |
+      #     brew install upx
+      #     upx --version
 
-      - name: Compress executable
+      - name: Compress executable (Linux / Windows)
+        if: matrix.os_name == 'linux' || matrix.os_name == 'windows'
         shell: bash
         run: |
           echo "Compressing with UPX..."
