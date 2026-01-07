@@ -15,6 +15,10 @@ extern "C" fn is_interrupted(sig : Int) -> Int = "is_interrupted"
 extern "C" fn clear_signal(sig : Int) -> Unit = "is_interrupted"
 
 ///|
+#borrow(from_path, to_path)
+extern "C" fn c_rename_file(from_path : Bytes, to_path : Bytes) -> Int = "rename_file"
+
+///|
 pub fn overwrite_line(text : String) -> Unit {
   console_overwrite(@encoding/utf8.encode(text))
 }

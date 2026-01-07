@@ -90,6 +90,9 @@ async fn redirect(
 }
 
 ///|
+const FLE_TMP_SUFFIX = ".tmp"
+
+///|
 async fn download(
   url : String,
   file_name : String?,
@@ -152,47 +155,78 @@ async fn download(
     file_path
   }
   print_when_only_running("保存到文件: \{file_path}")
+  let dest_file_path = file_path
+  // 将文件名加上.tmp，保存为临时文件，成功后改名为实际文件名
+  let file_path = file_path + FLE_TMP_SUFFIX
   let file = @fs.open(file_path, mode=@fs.Mode::WriteOnly, create=0o640)
   // 获取最新文件名用于显示
   let file_name = file_path.split("/").collect().last().unwrap().to_string()
   defer file.close()
   let size_MB = round_to(size / 1024 / 1024)
   let start_time = @env.now()
-  // 每次读取的大小
-  let chunk_size = 1024 * 1024
   let mut prev_time = start_time
   let mut prev_size = 0L
   print_when_only_running("任务 \{id} : \{url} 开始下载...")
-  while true {
-    if (prev_time - start_time) % 1000 == 0 {
-      // println("任务 \{id} 进行中...")
-    }
-    // 判断任务是否要终止
-    if task_status is Some(task_status) && !task_status.is_continue(id) {
-      println("任务 \{id} : \{url} 收到停止信号，终止执行")
-      // 删除文件
-      @fs.remove(file_path)
-      return None
-    }
-    let chunk = client.read_some(max_len=chunk_size) catch {
-      e => {
-        match e.to_string() {
-          "Cancelled" =>
-            // 被取消了，删除文件
-            @fs.remove(file_path)
-          _ => println("读取chunk出错：\{e}")
+  race([
+    // 写入内容导文件
+    async fn() {
+      file.write_reader(client)
+      // 判断是否为gzip文件
+      let need_rename = if is_gzip_file(file_path) {
+        print_when_only_running(
+          "文件 \{file_path} 是gzip文件，需要解码",
+        )
+        let success = gzip_decode(
+          file_path,
+          dest_file_path,
+          retain_src_file=false,
+        )
+        if success {
+          false
+        } else {
+          // 解码失败
+          println(red("gzip解码失败"))
+          true
         }
-        return None
+      } else {
+        true
       }
-    }
-    if chunk is Some(chunk) {
-      file.write(chunk)
+      // 最终的文件路径
+      let file_path = if need_rename {
+        // 重命名
+        let success = renmae_file(file_path, dest_file_path)
+        if success {
+          dest_file_path
+        } else {
+          println(red("重命名失败"))
+          file_path
+        }
+      } else {
+        dest_file_path
+      }
+      console_clear_line()
+      // 计算下载时间
+      let time = @cmp.maximum(@env.now() - start_time, 1)
+      Some(DownloadResult::{ url, file_name, file_path, size, time })
+    },
+    // 判断任务是否要终止
+    get_async_infinite_loop(async fn() {
+      if task_status is Some(task_status) && !task_status.is_continue(id) {
+        println("任务 \{id} : \{url} 收到停止信号，终止执行")
+        // 删除文件
+        @fs.remove(file_path)
+        return (false, None)
+      }
+      (true, None)
+    }),
+    // 打印实时速度
+    get_async_infinite_loop(async fn() {
       let now = @env.now()
       // 耗时（秒）
       let spend_time = now - prev_time
       // 有可能下载速度很快，导致耗时为0
       if spend_time == 0 {
-        continue
+        return (true, None)
       }
       let download_size = file.size() - prev_size
       // println("下载了 \{download_size} 字节, 耗时 \{spend_time} ms")
@@ -223,15 +257,7 @@ async fn download(
       if task_status is Some(task_status) {
         task_status.set(id, current_size)
       }
-      if !is_only_running() {
-        @async.pause()
-      }
-    } else {
-      break
-    }
-  }
-  console_clear_line()
-  // 计算平均下载速度
-  let time = @cmp.maximum(@env.now() - start_time, 1)
-  Some(DownloadResult::{ url, file_name, file_path, size, time })
+      (true, None)
+    }),
+  ])
 }

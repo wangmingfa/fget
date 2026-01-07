@@ -186,3 +186,20 @@ pub async fn[T] race_with_ctrl_c(tasks : FixedArray[RaceFn[T]]) -> T? {
   })
   race(FixedArray::from_array(tasks))
 }
+
+///|
+/// 异步死循环，f函数返回(false, T)则终止循环
+pub async fn[T] async_infinite_loop(f : async () -> (Bool, T)) -> T {
+  while true {
+    if f() is (false, res) {
+      return res
+    }
+    @async.pause()
+  }
+  fail("async_infinite_loop出现异常")
+}
+
+///|
+pub fn[T] get_async_infinite_loop(f : async () -> (Bool, T)) -> async () -> T {
+  async fn() { async_infinite_loop(f) }
+}

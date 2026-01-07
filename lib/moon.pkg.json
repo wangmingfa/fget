@@ -5,10 +5,12 @@
       "moonbitlang/async",
       "moonbitlang/async/http",
       "moonbitlang/async/fs",
-      "justjavac/glob"
+      "justjavac/glob",
+      "moonbitlang/async/process"
     ],
     "native-stub": [
       "c/console.c",
-      "c/signal.c"
+      "c/signal.c",
+      "c/file.c"
     ]
 }
