@@ -30,7 +30,7 @@ async fn main {
 
 ///|
 async fn check_gzip() -> Bool {
-  let status = @process.run("gzip", ["--version"])
+  let status = @process.run("gzip", ["--version"]) catch { _ => return false }
   return status == 0
 }
 
