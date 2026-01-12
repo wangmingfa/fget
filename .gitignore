@@ -2,3 +2,6 @@
 target/
 .mooncakes/
 .moonagent/
+_build
+.idea
+cmake-build-debug

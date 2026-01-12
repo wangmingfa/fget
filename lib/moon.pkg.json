@@ -11,6 +11,7 @@
     "native-stub": [
       "c/console.c",
       "c/signal.c",
-      "c/file.c"
+      "c/file.c",
+      "c/gzip_inflate.c"
     ]
 }

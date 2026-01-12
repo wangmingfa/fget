@@ -49,17 +49,11 @@ async fn get_inner(
 ) -> DownloadResult? {
   let p = yellow("开始")
   println("\{p} \{url}")
-  // 从url取出host
-  guard url.split("://").collect().get(1) is Some(urlWithoutProtocol) else {
-    return None
-  }
-  let host = urlWithoutProtocol.split("/").collect()[0].to_string()
   // FIXME 下载github链接时，会报500
   let (res, client) = @http.get_stream(url, headers={
-    "host": host,
     "User-Agent": "Mozilla/5.0",
     "Accept": "*/*",
-    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Encoding": "gzip",
     "Connection": "keep-alive",
   })
   defer client.close()
@@ -188,18 +182,19 @@ async fn download(
         print_when_only_running(
           "文件 \{file_path} 是gzip文件，需要解码",
         )
-        let success = gzip_decode(
+        let mut need_rename = false
+        gzip_decode_file_to_target(
           file_path,
           dest_file_path,
           retain_src_file=false,
-        )
-        if success {
-          false
-        } else {
-          // 解码失败
-          println(red("gzip解码失败"))
-          true
+        ) catch {
+          e => {
+            need_rename = true
+            // 解码失败
+            println(red("gzip解码失败: \{e}"))
+          }
         }
+        need_rename
       } else {
         true
       }

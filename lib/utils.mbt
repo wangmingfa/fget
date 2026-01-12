@@ -32,7 +32,7 @@ test "test_get_from_map_ignore_case" {
 
 ///|
 pub fn round_to(value : Double, digits? : Int = 2) -> Double {
-  let factor = (10.0 : Double).pow(digits.to_double())
+  let factor = @math.pow((10.0 : Double), digits.to_double())
   (value * factor).round() / factor
 }
 

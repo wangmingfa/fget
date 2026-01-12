@@ -1,2 +1,4 @@
 ///|
-pub suberror StringError String
+pub suberror StringError {
+  StringError(String)
+}

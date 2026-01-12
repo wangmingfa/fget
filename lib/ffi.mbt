@@ -63,3 +63,64 @@ pub async fn wait_signal(signal : Signal) -> Unit {
   }
   clear_signal(signal)
 }
+
+// ========== C 指针类型 ==========
+
+///|
+priv struct HuffTable {
+  sym : FixedArray[UInt16]
+  len : FixedArray[UInt]
+}
+
+///|
+priv struct GzipDecoder {
+  input : Bytes
+  // input
+  in_len : Int64
+  in_pos : Int64
+
+  //  bitstream
+  bitbuf : UInt
+  bitcnt : Int
+
+  //  window
+  window : Bytes
+  win_pos : UInt64
+
+  //  huffman
+  ll : HuffTable
+  dd : HuffTable
+
+  //  state 
+  header_done : Int
+  finished : Int
+  last_block : Int
+}
+
+// ========== C 回调类型 ==========
+
+///|
+type OutputCallback = FuncRef[(UserData, Bytes, UInt64) -> Unit]
+
+// ========== extern C ==========
+
+///|
+extern "C" fn gzip_decoder_new() -> GzipDecoder = "gzip_decoder_new"
+
+///|
+#owned(d)
+extern "C" fn gzip_decoder_free(d : GzipDecoder) = "gzip_decoder_free"
+
+///|
+type UserData = @buffer.Buffer
+
+///|
+#borrow(data, userdata)
+#owned(d)
+extern "C" fn gzip_decoder_push(
+  d : GzipDecoder,
+  data : Bytes,
+  len : Int,
+  out : OutputCallback,
+  userdata : UserData,
+) -> Int = "gzip_decoder_push"
